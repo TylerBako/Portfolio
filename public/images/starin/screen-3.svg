@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#232532"/>
+  <rect x="0.5" y="0.5" width="1599" height="999" fill="none" stroke="#3f424d"/>
+  <text x="50%" y="50%" fill="#9184d9" font-family="Inter, system-ui, sans-serif" font-size="57" text-anchor="middle">StarIn · screen 3</text>
+  <text x="50%" y="50%" dy="88" fill="#75798c" font-family="Inter, system-ui, sans-serif" font-size="33" text-anchor="middle">placeholder · 16:10</text>
+</svg>

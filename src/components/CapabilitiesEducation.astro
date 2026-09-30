@@ -1,0 +1,109 @@
+---
+import SectionLabel from './SectionLabel.astro';
+import { capabilities, education } from '../data/content';
+---
+
+<div class="cap-edu rule-top">
+  <section class="col" aria-labelledby="capabilities">
+    <SectionLabel id="capabilities" text="Capabilities" />
+    <dl class="groups">
+      {
+        capabilities.map((c) => (
+          <div class="group">
+            <dt>{c.group}</dt>
+            <dd>
+              <ul class="tags">
+                {c.items.map((item) => (
+                  <li class="tag tag-neutral">{item}</li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="col" aria-labelledby="education">
+    <SectionLabel id="education" text="Education" />
+    {
+      education.map((e) => (
+        <div class="school">
+          <h3>{e.school}</h3>
+          <p class="degree">{e.degree}</p>
+          <p class="years">{e.years}</p>
+        </div>
+      ))
+    }
+  </section>
+</div>
+
+<style>
+  .cap-edu {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 72px;
+    align-items: start;
+    padding: 64px var(--gutter) 72px;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .groups {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin: 0;
+  }
+  .group {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 20px;
+    align-items: baseline;
+  }
+  dt {
+    font-size: 14px;
+    color: var(--text-64);
+  }
+  dd { margin: 0; }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .school {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  h3 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 30px;
+    letter-spacing: normal;
+  }
+  .degree {
+    margin: 0;
+    font-size: 15.5px;
+    line-height: 26px;
+  }
+  .years {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--text-60);
+  }
+
+  @media (max-width: 900px) {
+    .cap-edu {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 56px;
+    }
+    .group { grid-template-columns: 110px minmax(0, 1fr); }
+  }
+</style>

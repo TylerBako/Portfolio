@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Work from '../components/Work.astro';
+import Approach from '../components/Approach.astro';
+import CapabilitiesEducation from '../components/CapabilitiesEducation.astro';
+import Footer from '../components/Footer.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { profile } from '../data/content';
+---
+
+<Base title={`${profile.name} · ${profile.title}`} description={profile.intro}>
+  <Nav />
+  <main class="page">
+    <Hero />
+    <Work />
+    <Approach />
+    <CapabilitiesEducation />
+  </main>
+  <div class="page">
+    <Footer />
+  </div>
+  <Lightbox />
+</Base>

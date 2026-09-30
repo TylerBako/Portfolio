@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="800" viewBox="0 0 640 800">
+  <rect width="640" height="800" fill="#232532"/>
+  <rect x="0.5" y="0.5" width="639" height="799" fill="none" stroke="#3f424d"/>
+  <text x="50%" y="50%" fill="#9184d9" font-family="Inter, system-ui, sans-serif" font-size="22" text-anchor="middle">Portrait</text>
+  <text x="50%" y="50%" dy="35" fill="#75798c" font-family="Inter, system-ui, sans-serif" font-size="13" text-anchor="middle">placeholder · 4:5</text>
+</svg>

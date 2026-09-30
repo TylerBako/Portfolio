@@ -1,0 +1,27 @@
+---
+import { profile } from '../data/content';
+---
+
+<header class="page">
+  <nav class="nav" aria-label="Main">
+    <a class="nav-brand" href="#top">{profile.name}</a>
+    <a class="nav-link" href="#work">Work</a>
+    <a class="nav-link" href="#about">About</a>
+    <a class="nav-link" href="#contact">Contact</a>
+    <a class="btn btn-primary" href={profile.links.email}>Say hello</a>
+  </nav>
+</header>
+
+<style>
+  .nav {
+    padding-inline: var(--gutter);
+  }
+  /* .nav a would otherwise shrink the brand to 14px. */
+  .nav-brand {
+    font-size: 18px;
+    color: var(--color-text);
+  }
+  @media (max-width: 560px) {
+    .nav-link { display: none; }
+  }
+</style>

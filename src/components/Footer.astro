@@ -1,0 +1,54 @@
+---
+import { profile } from '../data/content';
+
+const links = [
+  { label: 'Email', href: profile.links.email },
+  { label: 'GitHub', href: profile.links.github },
+  { label: 'LinkedIn', href: profile.links.linkedin },
+];
+---
+
+<footer class="footer rule-top" id="contact">
+  <p class="prompt">{profile.footerPrompt}</p>
+  <ul class="links">
+    {
+      links.map((l) => (
+        <li>
+          <a href={l.href}>{l.label}</a>
+        </li>
+      ))
+    }
+  </ul>
+</footer>
+
+<style>
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 24px;
+    padding: 42px var(--gutter) 56px;
+    scroll-margin-top: 24px;
+  }
+  .prompt {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    font-size: 24px;
+  }
+  .links {
+    display: flex;
+    gap: 24px;
+    font-size: 15px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (max-width: 900px) {
+    .footer {
+      flex-direction: column;
+      gap: 20px;
+    }
+  }
+</style>

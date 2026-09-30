@@ -1,0 +1,70 @@
+---
+import { profile } from '../data/content';
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="copy">
+    <h1 id="hero-title">
+      {profile.headline.map((line) => <span>{line}</span>)}
+    </h1>
+    <p class="intro">{profile.intro}</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="#work">See my work</a>
+      <a class="btn btn-ghost" href={profile.cv} download>Download CV</a>
+    </div>
+  </div>
+  <div class="portrait lighten">
+    <img src={profile.portrait.src} alt={profile.portrait.alt} width="320" height="400" />
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 72px;
+    align-items: center;
+    padding: 96px var(--gutter) 84px;
+  }
+  .copy {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  h1 {
+    margin: 0 0 0 -0.06em;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+  h1 span { display: block; }
+  .intro {
+    margin: 0;
+    font-size: 17px;
+    line-height: 28px;
+    max-width: 58ch;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .portrait {
+    width: 320px;
+    height: 400px;
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 48px;
+      padding-block: 56px 64px;
+    }
+    .portrait {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      aspect-ratio: 4 / 5;
+    }
+  }
+</style>

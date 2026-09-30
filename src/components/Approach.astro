@@ -1,0 +1,63 @@
+---
+import SectionLabel from './SectionLabel.astro';
+import { approach } from '../data/content';
+---
+
+<section class="approach rule-top" aria-labelledby="about">
+  <SectionLabel id="about" text="Engineering approach" />
+  <ol class="items">
+    {
+      approach.map((a) => (
+        <li class="item">
+          <span class="num">{a.num}</span>
+          <div class="text">
+            <h3>{a.title}</h3>
+            <p>{a.body}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .approach {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 64px var(--gutter);
+  }
+  .items {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 16px;
+    align-items: baseline;
+  }
+  .num { font-size: 14px; }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  h3 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 30px;
+    letter-spacing: normal;
+  }
+  p {
+    margin: 0;
+    font-size: 15.5px;
+    line-height: 28px;
+    color: var(--text-78);
+    max-width: 52ch;
+  }
+</style>

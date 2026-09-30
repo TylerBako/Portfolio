@@ -1,0 +1,97 @@
+---
+import SectionLabel from './SectionLabel.astro';
+import { projects, showMeta } from '../data/content';
+---
+
+<section class="work" aria-labelledby="work">
+  <SectionLabel id="work" text="Selected work" />
+  <ol class="rows">
+    {
+      projects.map((p) => (
+        <li class="row rule-top">
+          <p class="num">{p.num}</p>
+          <div class="text">
+            <h3>{p.name}</h3>
+            <p class="blurb">{p.blurb}</p>
+            {showMeta && <p class="meta">{p.meta}</p>}
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-lightbox-open={p.id}
+              aria-haspopup="dialog"
+            >
+              View screens<span class="visually-hidden"> for {p.name}</span>
+            </button>
+          </div>
+          <div class="cover lighten">
+            <img src={p.cover.src} alt={p.cover.alt} width="520" height="325" loading="lazy" />
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .work {
+    padding: 0 var(--gutter) 56px;
+  }
+  .rows {
+    list-style: none;
+    margin: 28px 0 0;
+    padding: 0;
+  }
+  .row {
+    --rule: var(--color-neutral-700);
+    display: grid;
+    /* 520px at the 1280px design width; shrinks proportionally below it. */
+    grid-template-columns: 64px minmax(0, 1fr) min(520px, 47%);
+    gap: 48px;
+    align-items: start;
+    padding: 42px 0;
+  }
+  .num {
+    margin: 0;
+    font-size: 15px;
+    line-height: 28px;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  h3 {
+    margin: 0;
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: -0.012em;
+  }
+  .blurb {
+    margin: 0;
+    font-size: 15.5px;
+    line-height: 28px;
+    color: var(--text-78);
+    max-width: 44ch;
+  }
+  .meta {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--text-60);
+  }
+  .btn { margin-top: 8px; }
+  .cover {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+  }
+
+  @media (max-width: 900px) {
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+      padding: 36px 0;
+    }
+    h3 { font-size: 28px; line-height: 36px; }
+  }
+</style>

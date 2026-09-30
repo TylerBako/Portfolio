@@ -1,0 +1,220 @@
+---
+import { projects } from '../data/content';
+
+// Only what the script needs, keyed by project id.
+const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, screens: p.screens }]));
+---
+
+<dialog class="lightbox" aria-labelledby="lightbox-title">
+  <div class="panel">
+    <div class="header">
+      <div class="title">
+        <h2 id="lightbox-title" data-lb-name></h2>
+        <span class="count" data-lb-count aria-live="polite"></span>
+      </div>
+      <div class="controls">
+        <button type="button" class="btn btn-ghost" data-lb-prev aria-label="Previous screen">←</button>
+        <button type="button" class="btn btn-ghost" data-lb-next aria-label="Next screen">→</button>
+        <button type="button" class="btn btn-secondary" data-lb-close>Close</button>
+      </div>
+    </div>
+    <div class="stage">
+      <img data-lb-img alt="" />
+    </div>
+    <div class="dots" data-lb-dots></div>
+  </div>
+</dialog>
+
+<!-- Escape "<" so content containing "</script" can't end this element early. -->
+<script
+  type="application/json"
+  id="lightbox-data"
+  set:html={JSON.stringify(data).replace(/</g, '\\u003c')}
+/>
+
+<script>
+  interface Screen { src: string; alt: string }
+  type Data = Record<string, { name: string; screens: Screen[] }>;
+
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.lightbox')!;
+  const data: Data = JSON.parse(document.getElementById('lightbox-data')!.textContent!);
+  const nameEl = dialog.querySelector<HTMLElement>('[data-lb-name]')!;
+  const countEl = dialog.querySelector<HTMLElement>('[data-lb-count]')!;
+  const img = dialog.querySelector<HTMLImageElement>('[data-lb-img]')!;
+  const dotsEl = dialog.querySelector<HTMLElement>('[data-lb-dots]')!;
+
+  let screens: Screen[] = [];
+  let index = 0;
+
+  function render() {
+    const screen = screens[index];
+    img.src = screen.src;
+    img.alt = screen.alt;
+    countEl.textContent = `${index + 1} / ${screens.length}`;
+    dotsEl.querySelectorAll('button').forEach((dot, i) => {
+      dot.setAttribute('aria-current', String(i === index));
+    });
+  }
+
+  function go(i: number) {
+    index = (i + screens.length) % screens.length;
+    render();
+  }
+
+  function open(projectId: string) {
+    const project = data[projectId];
+    if (!project || project.screens.length === 0) return;
+    screens = project.screens;
+    index = 0;
+    img.removeAttribute('src');
+    screens.forEach((s) => { new Image().src = s.src; });
+    nameEl.textContent = project.name;
+    dotsEl.replaceChildren(
+      ...screens.map((_, i) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'dot';
+        dot.setAttribute('aria-label', `Screen ${i + 1}`);
+        dot.addEventListener('click', () => go(i));
+        return dot;
+      }),
+    );
+    render();
+    dialog.showModal();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-lightbox-open]').forEach((btn) => {
+    btn.addEventListener('click', () => open(btn.dataset.lightboxOpen!));
+  });
+
+  dialog.querySelector('[data-lb-prev]')!.addEventListener('click', () => go(index - 1));
+  dialog.querySelector('[data-lb-next]')!.addEventListener('click', () => go(index + 1));
+  dialog.querySelector('[data-lb-close]')!.addEventListener('click', () => dialog.close());
+
+  // Esc is handled natively by <dialog>. Arrow keys listen on the document because
+  // clicking non-focusable content (the image, the panel) moves focus to <body>,
+  // and keys pressed then never pass through the dialog.
+  document.addEventListener('keydown', (e) => {
+    if (!dialog.open) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
+  });
+
+  // The dialog fills the viewport, so a click that both starts and ends on it
+  // (not on the panel) is a backdrop click. Tracking pointerdown avoids closing
+  // when a drag starts inside the panel and ends outside it.
+  let downOnBackdrop = false;
+  dialog.addEventListener('pointerdown', (e) => { downOnBackdrop = e.target === dialog; });
+  dialog.addEventListener('click', (e) => {
+    if (downOnBackdrop && e.target === dialog) dialog.close();
+    downOnBackdrop = false;
+  });
+</script>
+
+<style>
+  .lightbox {
+    /* Reset UA dialog styles so the element itself is the full-screen backdrop. */
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 48px;
+    border: 0;
+    overflow-y: auto;
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .lightbox[open] {
+    display: flex;
+    justify-content: center;
+  }
+  .lightbox::backdrop { background: transparent; }
+
+  .panel {
+    width: min(1100px, 100%, max(280px, calc((100vh - 200px) * 1.6)));
+    width: min(1100px, 100%, max(280px, calc((100dvh - 200px) * 1.6)));
+    margin-block: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .title {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    min-width: 0;
+  }
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: normal;
+  }
+  .count {
+    font-size: 14px;
+    color: var(--text-64);
+    font-feature-settings: 'tnum' 1;
+  }
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex: none;
+  }
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    background: var(--color-surface);
+    overflow: hidden;
+  }
+  .stage img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+  /* Dots are created by the script, so they need :global to pick up scoped styles. */
+  .dots :global(.dot) {
+    all: unset;
+    cursor: pointer;
+    width: 28px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-neutral-700);
+    /* Larger hit area than the 3px bar. */
+    padding-block: 8px;
+    background-clip: content-box;
+  }
+  .dots :global(.dot[aria-current='true']) { background-color: var(--color-accent); }
+  .dots :global(.dot:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 560px) {
+    .lightbox { padding: 16px; }
+    .header { flex-wrap: wrap; }
+  }
+</style>
+
+<style is:global>
+  /* Lock page scroll while the lightbox is open. */
+  html:has(dialog.lightbox[open]) { overflow: hidden; }
+</style>
