@@ -1,6 +1,9 @@
 ---
 import SectionLabel from './SectionLabel.astro';
 import { projects, showMeta } from '../data/content';
+
+// Tags shown before the "+N more" toggle.
+const visibleTags = 5;
 ---
 
 <section class="work" aria-labelledby="work">
@@ -14,23 +17,71 @@ import { projects, showMeta } from '../data/content';
             <h3>{p.name}</h3>
             <p class="blurb">{p.blurb}</p>
             {showMeta && <p class="meta">{p.meta}</p>}
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-lightbox-open={p.id}
-              aria-haspopup="dialog"
-            >
-              View screens<span class="visually-hidden"> for {p.name}</span>
-            </button>
+            {p.tags.length > 0 && (
+              <ul class="tags" id={`${p.id}-tags`} aria-label={`${p.name} tech`}>
+                {p.tags.map((tag, i) => (
+                  <li class="tag tag-neutral" hidden={i >= visibleTags} data-extra-tag={i >= visibleTags ? '' : undefined}>
+                    {tag}
+                  </li>
+                ))}
+                {p.tags.length > visibleTags && (
+                  <li>
+                    <button
+                      type="button"
+                      class="tag tag-outline more"
+                      aria-expanded="false"
+                      aria-controls={`${p.id}-tags`}
+                      data-tags-toggle
+                      data-more={`+${p.tags.length - visibleTags} more`}
+                    >
+                      +{p.tags.length - visibleTags} more
+                    </button>
+                  </li>
+                )}
+              </ul>
+            )}
+            {(p.url || p.repo) && (
+              <div class="actions">
+                {p.url && (
+                  <a class="btn btn-secondary" href={p.url} target="_blank" rel="noopener noreferrer">
+                    Visit site<span class="visually-hidden"> for {p.name} (opens in a new tab)</span> ↗
+                  </a>
+                )}
+                {p.repo && (
+                  <a class="btn btn-secondary" href={p.repo} target="_blank" rel="noopener noreferrer">
+                    View code<span class="visually-hidden"> for {p.name} (opens in a new tab)</span> ↗
+                  </a>
+                )}
+              </div>
+            )}
           </div>
-          <div class="cover lighten">
+          <button
+            type="button"
+            class="cover"
+            data-lightbox-open={p.id}
+            aria-haspopup="dialog"
+          >
             <img src={p.cover.src} alt={p.cover.alt} width="520" height="325" loading="lazy" />
-          </div>
+            <span class="visually-hidden">: open a larger view of {p.name}</span>
+          </button>
         </li>
       ))
     }
   </ol>
 </section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-tags-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') !== 'true';
+      btn.setAttribute('aria-expanded', String(expanded));
+      btn.textContent = expanded ? 'Show less' : (btn.dataset.more ?? '');
+      btn.closest('.tags')?.querySelectorAll<HTMLElement>('[data-extra-tag]').forEach((tag) => {
+        tag.hidden = !expanded;
+      });
+    });
+  });
+</script>
 
 <style>
   .work {
@@ -80,10 +131,57 @@ import { projects, showMeta } from '../data/content';
     letter-spacing: 0.04em;
     color: var(--text-60);
   }
-  .btn { margin-top: 8px; }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 44ch;
+  }
+  .tags li { display: flex; }
+  .more {
+    font: inherit;
+    font-size: 11px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .more:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 8px;
+  }
   .cover {
+    display: block;
     width: 100%;
     aspect-ratio: 16 / 10;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+  .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 200ms ease;
+  }
+  .cover:hover img,
+  .cover:focus-visible img {
+    transform: scale(1.03);
+  }
+  .cover:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cover img { transition: none; }
   }
 
   @media (max-width: 900px) {
