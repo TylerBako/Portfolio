@@ -8,7 +8,7 @@ import { profile } from '../data/content';
     <a class="nav-link" href="#work">Work</a>
     <a class="nav-link" href="#about">About</a>
     <a class="nav-link" href="#contact">Contact</a>
-    <a class="btn btn-primary" href={profile.links.email}>Say hello</a>
+    <a class="btn btn-primary" href={profile.links.email} data-contact-open aria-haspopup="dialog">Say hello</a>
   </nav>
 </header>
 
@@ -16,12 +16,15 @@ import { profile } from '../data/content';
   .nav {
     padding-inline: var(--gutter);
   }
-  /* .nav a would otherwise shrink the brand to 14px. */
+  /* Larger than Nocturne's 18px brand, since the hero no longer carries the name.
+     Set explicitly because .nav a would otherwise shrink it to 14px. */
   .nav-brand {
-    font-size: 18px;
+    font-size: 24px;
+    letter-spacing: -0.01em;
     color: var(--color-text);
   }
   @media (max-width: 560px) {
     .nav-link { display: none; }
+    .nav-brand { font-size: 20px; }
   }
 </style>

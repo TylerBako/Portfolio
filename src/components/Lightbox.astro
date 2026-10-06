@@ -5,7 +5,7 @@ import { projects } from '../data/content';
 const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, screens: p.screens }]));
 ---
 
-<dialog class="lightbox" aria-labelledby="lightbox-title">
+<dialog class="lightbox modal" aria-labelledby="lightbox-title">
   <div class="panel">
     <div class="header">
       <div class="title">
@@ -13,8 +13,12 @@ const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, scree
         <span class="count" data-lb-count aria-live="polite"></span>
       </div>
       <div class="controls">
-        <button type="button" class="btn btn-ghost" data-lb-prev aria-label="Previous screen">←</button>
-        <button type="button" class="btn btn-ghost" data-lb-next aria-label="Next screen">→</button>
+        <button type="button" class="btn btn-secondary arrow" data-lb-prev aria-label="Previous screen">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6" /></svg>
+        </button>
+        <button type="button" class="btn btn-secondary arrow" data-lb-next aria-label="Next screen">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </button>
         <button type="button" class="btn btn-secondary" data-lb-close>Close</button>
       </div>
     </div>
@@ -33,6 +37,8 @@ const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, scree
 />
 
 <script>
+  import { closeOnBackdropClick } from '../scripts/modal';
+
   interface Screen { src: string; alt: string }
   type Data = Record<string, { name: string; screens: Screen[] }>;
 
@@ -42,6 +48,8 @@ const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, scree
   const countEl = dialog.querySelector<HTMLElement>('[data-lb-count]')!;
   const img = dialog.querySelector<HTMLImageElement>('[data-lb-img]')!;
   const dotsEl = dialog.querySelector<HTMLElement>('[data-lb-dots]')!;
+  const prevBtn = dialog.querySelector<HTMLButtonElement>('[data-lb-prev]')!;
+  const nextBtn = dialog.querySelector<HTMLButtonElement>('[data-lb-next]')!;
 
   let screens: Screen[] = [];
   let index = 0;
@@ -69,6 +77,9 @@ const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, scree
     img.removeAttribute('src');
     screens.forEach((s) => { new Image().src = s.src; });
     nameEl.textContent = project.name;
+    // A single screen needs no counter, arrows or dots.
+    const single = screens.length === 1;
+    [countEl, prevBtn, nextBtn, dotsEl].forEach((el) => { el.hidden = single; });
     dotsEl.replaceChildren(
       ...screens.map((_, i) => {
         const dot = document.createElement('button');
@@ -87,8 +98,8 @@ const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, scree
     btn.addEventListener('click', () => open(btn.dataset.lightboxOpen!));
   });
 
-  dialog.querySelector('[data-lb-prev]')!.addEventListener('click', () => go(index - 1));
-  dialog.querySelector('[data-lb-next]')!.addEventListener('click', () => go(index + 1));
+  prevBtn.addEventListener('click', () => go(index - 1));
+  nextBtn.addEventListener('click', () => go(index + 1));
   dialog.querySelector('[data-lb-close]')!.addEventListener('click', () => dialog.close());
 
   // Esc is handled natively by <dialog>. Arrow keys listen on the document because
@@ -100,41 +111,10 @@ const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, scree
     if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
   });
 
-  // The dialog fills the viewport, so a click that both starts and ends on it
-  // (not on the panel) is a backdrop click. Tracking pointerdown avoids closing
-  // when a drag starts inside the panel and ends outside it.
-  let downOnBackdrop = false;
-  dialog.addEventListener('pointerdown', (e) => { downOnBackdrop = e.target === dialog; });
-  dialog.addEventListener('click', (e) => {
-    if (downOnBackdrop && e.target === dialog) dialog.close();
-    downOnBackdrop = false;
-  });
+  closeOnBackdropClick(dialog);
 </script>
 
 <style>
-  .lightbox {
-    /* Reset UA dialog styles so the element itself is the full-screen backdrop. */
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    margin: 0;
-    padding: 48px;
-    border: 0;
-    overflow-y: auto;
-    color: var(--color-text);
-    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
-  .lightbox[open] {
-    display: flex;
-    justify-content: center;
-  }
-  .lightbox::backdrop { background: transparent; }
-
   .panel {
     width: min(1100px, 100%, max(280px, calc((100vh - 200px) * 1.6)));
     width: min(1100px, 100%, max(280px, calc((100dvh - 200px) * 1.6)));
@@ -170,6 +150,15 @@ const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, scree
     display: flex;
     gap: 8px;
     flex: none;
+  }
+  .arrow {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+  .arrow svg {
+    width: 22px;
+    height: 22px;
   }
   .stage {
     position: relative;
@@ -209,12 +198,6 @@ const data = Object.fromEntries(projects.map((p) => [p.id, { name: p.name, scree
   }
 
   @media (max-width: 560px) {
-    .lightbox { padding: 16px; }
     .header { flex-wrap: wrap; }
   }
-</style>
-
-<style is:global>
-  /* Lock page scroll while the lightbox is open. */
-  html:has(dialog.lightbox[open]) { overflow: hidden; }
 </style>
